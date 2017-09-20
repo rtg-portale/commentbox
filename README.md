@@ -33,7 +33,7 @@ Other users are notified on new comments, replies and when other users type.
 * Add [prettyTime](http://ocpsoft.org/prettytime/) and [prettytime-integration-jsf](http://ocpsoft.org/prettytime/#section-6) to your project and commentbox will automatically use it to display time
 
 ## Download
-[Here](https://github.com/rtg-portale/commentbox/raw/master/demo-source/WebContent/WEB-INF/lib/commentbox-0.0.1-SNAPSHOT.jar) you can download the latest jar
+[Here](https://github.com/rtg-portale/commentbox/raw/master/demo-source/WebContent/WEB-INF/lib/commentbox-1.0.0-SNAPSHOT.jar) you can download the latest jar
 
 ## Documetation
 Download the documentation [here](https://github.com/rtg-portale/commentbox/raw/master/misc/documentation.pdf).
