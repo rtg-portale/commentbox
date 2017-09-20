@@ -21,9 +21,9 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:f="http://java.sun.com/jsf/core"
-	xmlns:wb="http://whitebyte.info/components">
+	xmlns:cb="http://rtg-portale.de/components">
 
-	<cc:interface componentType="info.whitebyte.component.commentbox">
+	<cc:interface componentType="de.rtg.component.commentbox">
 		<cc:attribute name="contextID" type="java.lang.String"/>
 		<cc:attribute name="comments" type="java.util.List" />		
 		<cc:attribute name="currentPage" type="java.lang.Long" />
@@ -35,19 +35,19 @@
 		<cc:attribute name="canEditAll" default="false" type="java.lang.Boolean" />
 		<cc:attribute name="canDeleteAll" default="false" type="java.lang.Boolean" />
 		<cc:attribute name="enableLiveFeatures" default="false" type="java.lang.Boolean" />
-		<cc:attribute name="editorControls" default="bold italic underline strikethrough | icon | image youtube | link unlink | source" type="java.lang.String" />
-		<cc:attribute name="editorSmileyBase" default="#{resource['whitebyte:commentbox/editor-smileys/1.gif']}" type="java.lang.String" />
+		<cc:attribute name="editorControls" default='[["bold", "italic", "underline", "strike"], ["emoticons"], ["link", "image", "video"]]' type="java.lang.String" />
+		<cc:attribute name="editorSmileyBase" default="#{resource['rtg:commentbox/editor-smileys/1.gif']}" type="java.lang.String" />
 		<cc:attribute name="editorSmileyCount" default="12" type="java.lang.String" />
-		<cc:attribute name="editorSmileyPopupWidth" default="60" type="java.lang.String" />
+		<cc:attribute name="editorSmileyPopupWidth" default="66" type="java.lang.String" />
 		<cc:attribute name="onFetchNewComments" method-signature="void myAction()" />
-		<cc:attribute name="onFetchNewAnswers" method-signature="void myAction(info.whitebyte.component.commentbox.Comment)" />
+		<cc:attribute name="onFetchNewAnswers" method-signature="void myAction(de.rtg.component.commentbox.Comment)" />
 		<cc:attribute name="onPageChange" method-signature="void myAction(java.lang.Long)" />
-		<cc:attribute name="onCreateComment" method-signature="boolean myAction(info.whitebyte.component.commentbox.Comment)" />
-		<cc:attribute name="onCreateAnswer" method-signature="boolean myAction(info.whitebyte.component.commentbox.Comment)" />
-		<cc:attribute name="onEditComment" method-signature="void myAction(info.whitebyte.component.commentbox.Comment)" />
-		<cc:attribute name="onCommentLike" method-signature="void myAction(info.whitebyte.component.commentbox.Comment)" />
-		<cc:attribute name="onCommentSpam" method-signature="void myAction(info.whitebyte.component.commentbox.Comment)" />
-		<cc:attribute name="onCommentDelete" method-signature="void myAction(info.whitebyte.component.commentbox.Comment)" />		
+		<cc:attribute name="onCreateComment" method-signature="boolean myAction(de.rtg.component.commentbox.Comment)" />
+		<cc:attribute name="onCreateAnswer" method-signature="boolean myAction(de.rtg.component.commentbox.Comment)" />
+		<cc:attribute name="onEditComment" method-signature="void myAction(de.rtg.component.commentbox.Comment)" />
+		<cc:attribute name="onCommentLike" method-signature="void myAction(de.rtg.component.commentbox.Comment)" />
+		<cc:attribute name="onCommentSpam" method-signature="void myAction(de.rtg.component.commentbox.Comment)" />
+		<cc:attribute name="onCommentDelete" method-signature="void myAction(de.rtg.component.commentbox.Comment)" />		
 	</cc:interface>
 
 	<cc:implementation>
@@ -55,9 +55,48 @@
 	<script>
 	//<![CDATA[
 	$(function(){
+
 		// The images are set here because the el is not evaluated in the external js file..
-		$.cleditor.buttons.youtube.css.background = "URL(#{resource['whitebyte:commentbox/film-youtube.png']}) 50% 50% no-repeat";
-		initJQueryCLEditorIconPlugin("#{cc.attrs.editorSmileyBase}", #{cc.attrs.editorSmileyCount}, #{cc.attrs.editorSmileyPopupWidth});
+		initEmoticonPlugin('#{cc.id}', '#{cc.attrs.editorSmileyBase}', #{cc.attrs.editorSmileyCount}, #{cc.attrs.editorSmileyPopupWidth});
+		
+		var editorControls = JSON.parse('#{cc.attrs.editorControls}');
+		var toolbar = $('<div class="ui-editor-toolbar" />');
+		$.each(editorControls, function(i, group) {
+			var formatGroup = $('<span class="ql-formats" />');
+			
+			$.each(group, function(j, icon) {
+				var tag = 'button';
+				if (icon === 'color' || icon === 'background' || icon === 'font' || icon === 'size' || icon === 'align') {
+					tag = 'select';
+				}
+				
+				var values = [];
+				if (icon === 'script') {
+					values = ['sub', 'super'];
+				} else if (icon === 'header') {
+					values = ['1', '2'];
+				} else if (icon === 'list') {
+					values = ['ordered', 'bullet'];
+				} else if (icon === 'indent') {
+					values = ['-1', '+1'];
+				}
+				
+				if (icon === 'emoticons') {
+					formatGroup.append('<button class="editor-emoticons" type="button"><span class="ui-icon" /></button>');
+					formatGroup.find('.editor-emoticons .ui-icon').css('background-image', "url('#{cc.attrs.editorSmileyBase}')");
+				} else if (values.length > 0) {
+					$.each(values, function(k, value) {
+						formatGroup.append('<' + tag + ' class="ql-' + icon + '" value="' + value + '" />');
+					});
+				} else {
+					formatGroup.append('<' + tag + ' class="ql-' + icon + '" />');
+				}
+			});
+			
+			toolbar.append(formatGroup);
+		});
+		
+		PrimeFaces.widget.TextEditor.prototype.toolbarTemplate = toolbar.prop('outerHTML');
 	});
 	//]]>
 	</script>
@@ -77,11 +116,17 @@
 	
 						<div style="float: left;">
 							<a class="username">#{cc.attrs.currentUserUsername}</a>						
-							<p:editor id="editor" styleClass="comment_editor comment_editor-height-hack" value="#{cc.new_comment_editor_text}" controls="#{cc.attrs.editorControls}" height="120" width="600" widgetVar="editor"/>
+							<p:textEditor id="editor" styleClass="comment_editor comment_editor-height-hack" value="#{cc.new_comment_editor_text}" height="120" style="width: 600px;" widgetVar="editor"/>
 				
 							<h:panelGrid styleClass="comment_editorButtons" columns="2" style="margin-top:3px;display: none;">
-								<p:commandButton id="submitButton" styleClass="submitButton" widgetVar="submitButtonVar" value="#{commentboxmsg['commentbox.editor.save']}" icon="ui-icon-disk" update=":#{cc.cid(cc.innerWrapper)}" onclick="submitButtonVar.disable();$('.ui-button-text', this).html('Submitting...');#{cc.id}_commentboxWrapper.initDiffNodes();" oncomplete="submitButtonVar.enable();$(#{cc.id}_commentboxWrapper.comment_id + ' .newCommentPanel .submitButton .ui-button-text').html('Save');editor.clear();#{cc.id}_commentboxWrapper.indicateNewNodes();#{cc.id}_commentboxWrapper.reShowEditors();#{cc.id}_commentboxWrapper.showNewRepliesText();" actionListener="#{cc.createComment(cc.attrs.onCreateComment)}" />
-								<p:commandButton id="clearButton" type="button" value="#{commentboxmsg['commentbox.editor.clear']}" onclick="editor.clear()" icon="ui-icon-close" />
+								<p:commandButton id="submitButton" styleClass="submitButton" widgetVar="submitButtonVar"
+									value="#{commentboxmsg['commentbox.editor.save']}" icon="ui-icon-disk"
+									update=":#{cc.cid(cc.innerWrapper)}" actionListener="#{cc.createComment(cc.attrs.onCreateComment)}"
+									onclick="PF('submitButtonVar').disable();$('.ui-button-text', this).html('#{commentboxmsg['commentbox.editor.submitting']}');#{cc.id}_commentboxWrapper.initDiffNodes();"
+									oncomplete="PF('submitButtonVar').enable();$(#{cc.id}_commentboxWrapper.comment_id + ' .newCommentPanel .submitButton .ui-button-text').html('#{commentboxmsg['commentbox.editor.save']}');PF('editor').clear();#{cc.id}_commentboxWrapper.indicateNewNodes();#{cc.id}_commentboxWrapper.reShowEditors();#{cc.id}_commentboxWrapper.showNewRepliesText();" />
+									
+								<p:commandButton id="clearButton" type="button" value="#{commentboxmsg['commentbox.editor.clear']}"
+									onclick="PF('editor').clear()" icon="ui-icon-cancel" />
 							</h:panelGrid>					
 						</div>
 					</h:form>					
@@ -97,7 +142,7 @@
 				<span class="hiddenNewComments" style="display: none;">0</span>
 				
 				<p:outputPanel styleClass="comments">
-				    <wb:reversedTree value="#{cc.tree}" var="wrapper" id="tree" widgetVar="treeVar" styleClass="commentTree" cache="false" dynamic="true">
+				    <cb:reversedTree value="#{cc.tree}" var="wrapper" id="tree" widgetVar="treeVar" styleClass="commentTree" cache="false" dynamic="true">
 				        <p:treeNode styleClass="treenode-#{wrapper.right.id} #{wrapper.left ? 'treenode-dummy' : 'treenode-unique-id-'.concat(wrapper.right.id)}">	        
 				        	<p:outputPanel  rendered="#{not wrapper.left}">			        	
 								<h:form id="commentForm">
@@ -115,7 +160,7 @@
 												<span>
 													<p:outputPanel styleClass="info">
 														<h:outputText value="#{wrapper.right.modification_time}">
-															<f:converter converterId="info.whitebyte.ConditionalPrettyTimeConveter" />
+															<f:converter converterId="de.rtg.ConditionalPrettyTimeConveter" />
 														</h:outputText>
 													</p:outputPanel>
 												</span>
@@ -151,7 +196,7 @@
 													<p:outputPanel rendered="#{(not empty cc.attrs.onEditComment) and ((not empty cc.attrs.currentUserID) and ((wrapper.right.user_id eq cc.attrs.currentUserID) or cc.attrs.canEditAll))}">
 														<li class="bullet">•</li>
 														<li class="action lockondelete">
-															<a href="javascript:void(0)" rel="nofollow" class="#{wrapper.right.deleted ? 'clickedLink' : ''}" onclick="#{cc.id}_commentboxWrapper.saveCurrentEditComment(#{wrapper.right.id});#{cc.id}_commentboxWrapper.showInlineEditor();inlineEditorVar.saveHTML();">#{commentboxmsg['commentbox.comments.comment.edit']}</a>
+															<a href="javascript:void(0)" rel="nofollow" class="#{wrapper.right.deleted ? 'clickedLink' : ''}" onclick="#{cc.id}_commentboxWrapper.saveCurrentEditComment(#{wrapper.right.id});#{cc.id}_commentboxWrapper.showInlineEditor();">#{commentboxmsg['commentbox.comments.comment.edit']}</a>
 														</li>
 														
 													</p:outputPanel>
@@ -159,7 +204,7 @@
 													<p:outputPanel rendered="#{(not empty cc.attrs.onCommentDelete) and ((not empty cc.attrs.currentUserID) and ((wrapper.right.user_id eq cc.attrs.currentUserID) or cc.attrs.canDeleteAll))}">
 														<li class="bullet">•</li>
 														<li class="action lockondelete">
-															<p:commandLink value="#{commentboxmsg['commentbox.comments.comment.delete']}" styleClass="#{wrapper.right.deleted ? 'clickedLink' : ''}" onclick="#{cc.id}_commentboxWrapper.deleteComment(#{wrapper.right.id})" actionListener="#{cc.deleteComment(cc.attrs.onCommentDelete, wrapper.right)}" />
+															<p:commandLink value="#{commentboxmsg['commentbox.comments.comment.delete']}" styleClass="#{wrapper.right.deleted ? 'clickedLink' : ''}" onclick="if(!confirm('#{commentboxmsg['commentbox.comments.comment.delete.confirm']}')){return false;} #{cc.id}_commentboxWrapper.deleteComment(#{wrapper.right.id})" actionListener="#{cc.deleteComment(cc.attrs.onCommentDelete, wrapper.right)}" />
 														</li>
 													</p:outputPanel>
 													
@@ -173,7 +218,7 @@
 													<p:outputPanel styleClass="updateAnswersPanel updateAnswersPanel-#{wrapper.right.id}" style="display: none;">
 														<li class="bullet">•</li>
 														<li class="action">												
-															<a href="javascript:void(0)" rel="nofollow" class="getReplies" onclick="var commentid = $(this).closest('div.comment').attr('data-commentid');$(#{cc.id}_commentboxWrapper.comment_id + ' .rcGetAnswersForm').find('[name=\'currentAnswerComment\']').val(commentid);rcGetAnswers();#{cc.id}_commentboxWrapper.updateNodes(treeVar, $(this).closest('.ui-treenode'));$(this).closest('.updateAnswersPanel').css('display', 'none'); delete #{cc.id}_commentboxWrapper.newAnswers[commentid];">Show # new replies</a>
+															<a href="javascript:void(0)" rel="nofollow" class="getReplies" onclick="var commentid = $(this).closest('div.comment').attr('data-commentid');$(#{cc.id}_commentboxWrapper.comment_id + ' .rcGetAnswersForm').find('[name=\'currentAnswerComment\']').val(commentid);rcGetAnswers();#{cc.id}_commentboxWrapper.updateNodes(PF('treeVar'), $(this).closest('.ui-treenode'));$(this).closest('.updateAnswersPanel').css('display', 'none'); delete #{cc.id}_commentboxWrapper.newAnswers[commentid];">Show # new replies</a>
 														</li>
 													</p:outputPanel>
 													
@@ -201,7 +246,7 @@
 								</div>						
 							</p:outputPanel>
 				        </p:treeNode>
-				    </wb:reversedTree>
+				    </cb:reversedTree>
 				</p:outputPanel>
 
 				<p:outputPanel styleClass="cbpaginagtion" rendered="#{cc.attrs.commentsPerPage lt cc.attrs.commentCount}">
@@ -237,17 +282,17 @@
 			</p:outputPanel>
 			
 			<h:form id="inlineEditorForm" styleClass="inlineEditorForm" style="height: 0px; overflow: hidden">
-				<p:editor id="inlineEditor" styleClass="commentseditor inlineEditor" value="#{cc.edit_comment_editor_text}" controls="#{cc.attrs.editorControls}" height="120" width="600" widgetVar="inlineEditorVar" />
-				<p:commandButton id="submitButton" value="#{commentboxmsg['commentbox.editor.save']}" icon="ui-icon-disk" actionListener="#{cc.editComment(cc.attrs.onEditComment)}" onclick="#{cc.id}_commentboxWrapper.submitEdit();#{cc.id}_commentboxWrapper.initDiffNodes();" oncomplete="inlineEditorVar.clear();#{cc.id}_commentboxWrapper.indicateNewNodes();"/>
-				<p:commandButton id="clearButton" type="button" value="#{commentboxmsg['commentbox.editor.clear']}" onclick="inlineEditorVar.clear()" icon="ui-icon-close" />
+				<p:textEditor id="inlineEditor" styleClass="commentseditor inlineEditor" value="#{cc.edit_comment_editor_text}" height="120" style="width: 600px;" widgetVar="inlineEditorVar" />
+				<p:commandButton id="submitButton" value="#{commentboxmsg['commentbox.editor.save']}" icon="ui-icon-disk" actionListener="#{cc.editComment(cc.attrs.onEditComment)}" onclick="#{cc.id}_commentboxWrapper.submitEdit();#{cc.id}_commentboxWrapper.initDiffNodes();" oncomplete="PF('inlineEditorVar').clear();#{cc.id}_commentboxWrapper.indicateNewNodes();"/>
+				<p:commandButton id="clearButton" type="button" value="#{commentboxmsg['commentbox.editor.clear']}" onclick="PF('inlineEditorVar').clear()" icon="ui-icon-close" />
 				<p:commandButton id="cancelButton" type="button" value="#{commentboxmsg['commentbox.editor.cancel']}" onclick="#{cc.id}_commentboxWrapper.cancelEdit();" icon="ui-icon-close" />
 				<input id="currentEditComment" type="hidden" value="" name="currentEditComment"/>
 			</h:form>
 			
 			<h:form id="answerEditorForm" styleClass="answerEditorForm" style="height: 0px; overflow: hidden">
-				<p:editor id="inlineEditor" styleClass="commentseditor inlineEditor answerEditor" value="#{cc.answer_comment_editor_text}" controls="#{cc.attrs.editorControls}" height="120" width="600" widgetVar="answerEditorVar" />
-				<p:commandButton id="submitButton" ajax="true" value="#{commentboxmsg['commentbox.editor.save']}" icon="ui-icon-disk" update=":#{cc.cid(cc.innerWrapper)}" actionListener="#{cc.answerComment(cc.attrs.onCreateAnswer)}" onclick="#{cc.id}_commentboxWrapper.submitAnswer();#{cc.id}_commentboxWrapper.initDiffNodes();" oncomplete="answerEditorVar.clear();#{cc.id}_commentboxWrapper.reShowEditors();#{cc.id}_commentboxWrapper.indicateNewNodes();"/>
-				<p:commandButton id="clearButton" type="button" value="#{commentboxmsg['commentbox.editor.clear']}" onclick="answerEditorVar.clear();" icon="ui-icon-close" />
+				<p:textEditor id="inlineEditor" styleClass="commentseditor inlineEditor answerEditor" value="#{cc.answer_comment_editor_text}" height="120" style="width: 600px;" widgetVar="answerEditorVar" />
+				<p:commandButton id="submitButton" ajax="true" value="#{commentboxmsg['commentbox.editor.save']}" icon="ui-icon-disk" update=":#{cc.cid(cc.innerWrapper)}" actionListener="#{cc.answerComment(cc.attrs.onCreateAnswer)}" onclick="#{cc.id}_commentboxWrapper.submitAnswer();#{cc.id}_commentboxWrapper.initDiffNodes();" oncomplete="PF('answerEditorVar').clear();#{cc.id}_commentboxWrapper.reShowEditors();#{cc.id}_commentboxWrapper.indicateNewNodes();"/>
+				<p:commandButton id="clearButton" type="button" value="#{commentboxmsg['commentbox.editor.clear']}" onclick="PF('answerEditorVar').clear();" icon="ui-icon-close" />
 				<p:commandButton id="cancelButton" type="button" value="#{commentboxmsg['commentbox.editor.cancel']}" onclick="#{cc.id}_commentboxWrapper.cancelCreateAnswer();" icon="ui-icon-close" />
 				<input id="currentAnswerComment" type="hidden" value="" name="currentAnswerComment"/>
 			</h:form>

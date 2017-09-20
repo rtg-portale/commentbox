@@ -1,14 +1,14 @@
-#NOTE: THIS PROJECT IS NOT MAINTAINED ANYMORE
+This is a fork of Nick Russler's commentbox component (https://github.com/nickrussler/commentbox) that has been updated to work with PrimeFaces 6.1+
 
 # Commentbox
 
 This is a jsf component that allows quick realization of a comment functionality with many features.
 
-![logo](https://raw.github.com/nickrussler/commentbox/master/misc/images/banner.png)
+![logo](https://raw.github.com/rtg-portale/commentbox/master/misc/images/banner.png)
 
 ## Screenshot
 
-![screenshot](https://raw.github.com/nickrussler/commentbox/master/misc/images/sample.png)
+![screenshot](https://raw.github.com/rtg-portale/commentbox/master/misc/images/sample.png)
 
 ## Promo Video
 https://www.youtube.com/watch?v=9ZCklu-wI90
@@ -25,28 +25,28 @@ Other users are notified on new comments, replies and when other users type.
 
 ## Dependencies
 
-* Primefaces
+* PrimeFaces
  
 ### Optional Dependencies
 
-* Primefaces push (Atmosphere framework) - You need this when you want to use the live features (enabled by default)
+* PrimeFaces Push (Atmosphere framework) - You need this when you want to use the live features (enabled by default)
 * Add [prettyTime](http://ocpsoft.org/prettytime/) and [prettytime-integration-jsf](http://ocpsoft.org/prettytime/#section-6) to your project and commentbox will automatically use it to display time
 
 ## Download
-[Here](https://github.com/nickrussler/commentbox/raw/master/demo-source/WebContent/WEB-INF/lib/commentbox-0.0.1-SNAPSHOT.jar) you can download the latest jar
+[Here](https://github.com/rtg-portale/commentbox/raw/master/demo-source/WebContent/WEB-INF/lib/commentbox-0.0.1-SNAPSHOT.jar) you can download the latest jar
 
 ## Documetation
-Download the documentation [here](https://github.com/nickrussler/commentbox/raw/master/misc/documentation.pdf).
+Download the documentation [here](https://github.com/rtg-portale/commentbox/raw/master/misc/documentation.pdf).
 
 ## First Steps
 
-I recomend to take a look at the [demo](https://github.com/nickrussler/commentbox/tree/master/demo-source) at first.
+I recomend to take a look at the [demo](https://github.com/rtg-portale/commentbox/tree/master/demo-source) at first.
 
 Just deploy the demo project in any AS with eclipse or your IDE of choice, and try out some features!
 
 ### Extended Demo - DEPRECATED
 
-After you played around with the demo you can start to use it immediatly or you can take a look at the [extended demo](https://github.com/nickrussler/commentbox/tree/master/extended-demo-source).
+After you played around with the demo you can start to use it immediatly or you can take a look at the [extended demo](https://github.com/rtg-portale/commentbox/tree/master/extended-demo-source).
 
 In the extended demo a real database is used via JPA.
 
@@ -80,6 +80,7 @@ This project is open source and free, it is available under the [Apache v2 Licen
 
 ## Credits
 
+* Original commentbox - Nick Russler - https://github.com/nickrussler/commentbox
 * Fugue Icons - Yusuke Kamiyamane - http://p.yusukekamiyamane.com/
 * CLEditor YouTube Plugin v1.0.0 - Markus Horowski - http://www.terapix.de
 * TeamRot - The Group that developed the initial commentBox component at RWTH Aachen University. Members: Ahmet Yüksektepe, Arthur Otto, Kristjan Liiva, Nick Russler, Thomas Müller

@@ -6,7 +6,7 @@
 	version="2.0">
 	<application>
 		<resource-bundle>
-			<base-name>info.whitebyte.component.commentbox.messages</base-name>
+			<base-name>de.rtg.component.commentbox.messages</base-name>
 			<var>commentboxmsg</var>
 		</resource-bundle>
 	</application>

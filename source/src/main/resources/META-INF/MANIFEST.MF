@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
-Created-By: Whitebyte
+Created-By: RTG Portale GmbH
 Bundle-ManifestVersion: 2
 Bundle-Name: commentbox
 Bundle-Description: Commentbox
-Bundle-SymbolicName: info.whitebyte.commentbox
+Bundle-SymbolicName: de.rtg.commentbox
